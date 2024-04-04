@@ -20,7 +20,7 @@
  */
 
 const path = require('node:path')
-const { app, dialog, BrowserWindow, ipcMain } = require('electron')
+const { app, dialog, BrowserWindow, ipcMain, desktopCapturer, systemPreferences } = require('electron')
 const { setupMenu } = require('./app/app.menu.js')
 const { setupReleaseNotificationScheduler } = require('./app/githubReleaseNotification.service.js')
 const { enableWebRequestInterceptor, disableWebRequestInterceptor } = require('./app/webRequestInterceptor.js')
@@ -81,6 +81,20 @@ ipcMain.handle('app:setBadgeCount', async (event, count) => app.setBadgeCount(co
 ipcMain.on('app:relaunch', () => {
 	app.relaunch()
 	app.exit(0)
+})
+ipcMain.handle('app:getDesktopCapturerSources', async () => {
+	// macOS 10.15 Catalina or higher requires consent for screen access
+	if (systemPreferences.getMediaAccessStatus('screen') !== 'granted') {
+		// TODO: show user-friendly error in this case
+		return []
+	}
+
+	const sources = await desktopCapturer.getSources({ types: ['window', 'screen'], fetchWindowIcons: true })
+	return sources.map((source) => ({
+		id: source.id,
+		name: source.name,
+		icon: source.appIcon?.toDataURL(),
+	}))
 })
 
 app.whenReady().then(async () => {
