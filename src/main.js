@@ -112,6 +112,7 @@ ipcMain.handle('app:getDesktopCapturerSources', async () => {
 		id: source.id,
 		name: source.name,
 		icon: source.appIcon?.toDataURL(),
+		thumbnail: source.thumbnail?.toDataURL(),
 	}))
 })
 

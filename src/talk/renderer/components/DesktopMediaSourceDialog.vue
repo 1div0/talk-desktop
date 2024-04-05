@@ -116,12 +116,18 @@ const setVideoSources = async () => Promise.allSettled(sources.value.map(async (
 	videoElements[source.id].srcObject = await getStreamForMediaSource(source.id)
 }))
 
-onMounted(async () => {
-	await requestDesktopCapturerSources()
+const previewType = ref('none')
+
+const showLivePreviews = async () => {
+	previewType.value = 'video'
 	// Wait for video elements to be mounted
 	await nextTick()
 	// Set streams for all ids
 	await setVideoSources()
+}
+
+onMounted(async () => {
+	await requestDesktopCapturerSources()
 })
 
 onBeforeUnmount(() => {
@@ -143,16 +149,33 @@ onBeforeUnmount(() => {
 		size="normal"
 		:buttons="dialogButtons"
 		@update:open="handleCancel">
-		<div v-if="sources" class="capture-source-grid">
+		<template v-if="sources">
+			<div>sources: {{ sources.map((source) => source.id) }}</div>
+			<div>
+				<button :disabled="previewType === 'video'" @click="showLivePreviews">
+					Show live previews
+				</button>
+				<button :disabled="previewType === 'thumbnail'" @click="previewType = 'thumbnail'">
+					Show thumbnails
+				</button>
+			</div>
+		</template>
+		<div v-if="sources && previewType !== 'none'" class="capture-source-grid">
 			<label v-for="source in sources" :key="source.id" class="capture-source">
 				<input :id="source.id"
 					v-model="selectedSourceId"
 					class="capture-source__input"
 					type="radio"
 					:value="source.id">
-				<video :ref="(element) => videoElements[source.id] = element"
+				<video v-if="previewType === 'video'"
+					:ref="(element) => videoElements[source.id] = element"
 					class="capture-source__preview"
 					@loadedmetadata="$event.target.play()" />
+				<img v-else-if="previewType === 'thumbnail'"
+					alt=""
+					:src="source.thumbnail"
+					class="capture-source__preview">
+				<div v-else class="capture-source__preview">Preview is no available</div>
 				<span class="capture-source__caption">
 					<img v-if="source.icon"
 						alt=""
@@ -164,7 +187,7 @@ onBeforeUnmount(() => {
 				</span>
 			</label>
 		</div>
-		<NcEmptyContent v-else :name="t('talk_desktop', 'Loading …')">
+		<NcEmptyContent v-else :name="sources ? 'Please, press a button' : t('talk_desktop', 'Loading …')">
 			<template #icon>
 				<NcLoadingIcon />
 			</template>
