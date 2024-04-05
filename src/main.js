@@ -28,7 +28,7 @@ const { createAuthenticationWindow } = require('./authentication/authentication.
 const { openLoginWebView } = require('./authentication/login.window.js')
 const { createHelpWindow } = require('./help/help.window.js')
 const { createUpgradeWindow } = require('./upgrade/upgrade.window.js')
-const { getOs, isLinux } = require('./shared/os.utils.js')
+const { getOs, isLinux, isMac } = require('./shared/os.utils.js')
 const { createTalkWindow } = require('./talk/talk.window.js')
 const { createWelcomeWindow } = require('./welcome/welcome.window.js')
 const { installVueDevtools } = require('./install-vue-devtools.js')
@@ -84,7 +84,7 @@ ipcMain.on('app:relaunch', () => {
 })
 ipcMain.handle('app:getDesktopCapturerSources', async () => {
 	// macOS 10.15 Catalina or higher requires consent for screen access
-	if (systemPreferences.getMediaAccessStatus('screen') !== 'granted') {
+	if (isMac && systemPreferences.getMediaAccessStatus('screen') !== 'granted') {
 		// TODO: show user-friendly error in this case
 		return []
 	}
