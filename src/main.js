@@ -91,7 +91,23 @@ ipcMain.handle('app:getDesktopCapturerSources', async () => {
 		// The user will have to try again after granting access
 		return null
 	}
-	const sources = await desktopCapturer.getSources({ types: ['window', 'screen'], fetchWindowIcons: true, thumbnailSize: { width: 320, height: 320 } })
+
+	const getSourcesForType = (type) => desktopCapturer.getSources({
+		types: [type],
+		fetchWindowIcons: true,
+		thumbnailSize: {
+			// 16:9 aspect ratio
+			width: 320,
+			height: 180,
+		},
+	})
+	// An Electron bug on Linux+Wayland
+	// Requesting both screens and windows together triggers the native screen share dialog twice
+	// So we request them separately
+	const sources = [
+		...await getSourcesForType('screen'),
+		...await getSourcesForType('window'),
+	]
 	return sources.map((source) => ({
 		id: source.id,
 		name: source.name,
