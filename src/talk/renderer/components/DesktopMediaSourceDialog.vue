@@ -33,10 +33,17 @@ import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
 
 import { translate as t } from '@nextcloud/l10n'
 
+const props = defineProps({
+	sources: {
+		type: Array,
+		required: true,
+	},
+})
+
 const emit = defineEmits(['submit', 'cancel'])
 
 const selectedSourceId = ref(null)
-const sources = ref(null)
+// const sources = ref(null)
 const videoElements = {}
 
 const handleSubmit = () => emit('submit', selectedSourceId.value)
@@ -93,26 +100,26 @@ const getStreamForMediaSource = (mediaSourceId) => {
 }
 
 const requestDesktopCapturerSources = async () => {
-	sources.value = await window.TALK_DESKTOP.getDesktopCapturerSources()
+	// props.sources = await window.TALK_DESKTOP.getDesktopCapturerSources()
 
 	// There is no source. Probably the user hasn't granted the permission.
-	if (!sources.value) {
+	if (!props.sources) {
 		emit('cancel')
 	}
 
-	const hasMultipleScreens = sources.value.filter((source) => source.id.startsWith('screen:')).length > 1
+	const hasMultipleScreens = props.sources.filter((source) => source.id.startsWith('screen:')).length > 1
 
 	// There is no sourceId for the entire desktop in Electron - create a custom one
-	sources.value.unshift({
-		id: 'entire-desktop:0:0',
-		name: hasMultipleScreens ? t('talk_desktop', 'All screens with audio') : t('talk_desktop', 'Entire screen with audio'),
-	})
+	// props.sources.unshift({
+	// 	id: 'entire-desktop:0:0',
+	// 	name: hasMultipleScreens ? t('talk_desktop', 'All screens with audio') : t('talk_desktop', 'Entire screen with audio'),
+	// })
 
 	// Preselect the first media source if any
-	selectedSourceId.value = sources.value[0]?.id
+	selectedSourceId.value = props.sources[0]?.id
 }
 
-const setVideoSources = async () => Promise.allSettled(sources.value.map(async (source) => {
+const setVideoSources = async () => Promise.allSettled(props.sources.map(async (source) => {
 	videoElements[source.id].srcObject = await getStreamForMediaSource(source.id)
 }))
 
@@ -131,11 +138,11 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-	if (!sources.value) {
+	if (!props.sources) {
 		return
 	}
 	// Release all streams, otherwise they are still captured even if no video element is using them
-	for (const source of sources.value) {
+	for (const source of props.sources) {
 		const stream = videoElements[source.id].srcObject
 		for (const track of stream.getTracks()) {
 			track.stop()

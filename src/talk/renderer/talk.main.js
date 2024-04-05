@@ -48,3 +48,9 @@ await import('./notifications/notifications.store.js')
 window.OCA.Talk.Desktop = {
 	getDesktopMediaSource,
 }
+
+window.TALK_DESKTOP.onPromptDesktopCaptureSource(async (sources) => {
+	const { sourceId } = await getDesktopMediaSource(sources)
+	console.log('Selected sourceId:', sourceId)
+	window.TALK_DESKTOP.desktopCaptureSourceSelected(sourceId)
+})

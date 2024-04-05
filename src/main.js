@@ -20,7 +20,7 @@
  */
 
 const path = require('node:path')
-const { app, dialog, BrowserWindow, ipcMain, desktopCapturer, systemPreferences, shell } = require('electron')
+const { app, dialog, BrowserWindow, ipcMain, desktopCapturer, systemPreferences, shell, session } = require('electron')
 const { setupMenu } = require('./app/app.menu.js')
 const { setupReleaseNotificationScheduler } = require('./app/githubReleaseNotification.service.js')
 const { enableWebRequestInterceptor, disableWebRequestInterceptor } = require('./app/webRequestInterceptor.js')
@@ -257,6 +257,39 @@ app.whenReady().then(async () => {
 
 		mainWindow.destroy()
 		mainWindow = upgradeWindow
+	})
+
+	session.defaultSession.setDisplayMediaRequestHandler(async (request, callback) => {
+		const getSourcesForType = (type) => desktopCapturer.getSources({
+			types: [type],
+			fetchWindowIcons: true,
+			thumbnailSize: {
+				// 16:9 aspect ratio
+				width: 320,
+				height: 180,
+			},
+		})
+		// An Electron bug on Linux+Wayland
+		// Requesting both screens and windows together triggers the native screen share dialog twice
+		// So we request them separately
+		const sources = [
+			...await getSourcesForType('screen'),
+			...await getSourcesForType('window'),
+		]
+		const mappedSources = sources.map((source) => ({
+			id: source.id,
+			name: source.name,
+			icon: source.appIcon?.toDataURL(),
+			thumbnail: source.thumbnail?.toDataURL(),
+		}))
+
+		mainWindow.webContents.send('talk:onPromptDesktopCaptureSource', mappedSources)
+
+		ipcMain.once('talk:desktopCaptureSourceSelected', (event, sourceId) => {
+			console.log('Selected source', sourceId)
+			const source = sources.find((source) => source.id === sourceId)
+			callback({ video: source })
+		})
 	})
 
 	// On OS X it's common to re-create a window in the app when the

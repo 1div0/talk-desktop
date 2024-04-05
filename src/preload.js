@@ -136,6 +136,9 @@ const TALK_DESKTOP = {
 	 * @return {Promise<void>}
 	 */
 	showUpgrade: () => ipcRenderer.invoke('upgrade:show'),
+
+	onPromptDesktopCaptureSource: (callback) => ipcRenderer.on('talk:onPromptDesktopCaptureSource', (_event, sources) => callback(sources)),
+	desktopCaptureSourceSelected: (source) => ipcRenderer.send('talk:desktopCaptureSourceSelected', source),
 }
 
 // Set global window.TALK_DESKTOP

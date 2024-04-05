@@ -24,6 +24,13 @@ import { ref } from 'vue'
 
 import DesktopMediaSourceDialog from './components/DesktopMediaSourceDialog.vue'
 
+const props = defineProps({
+	sources: {
+		type: Array,
+		required: true,
+	},
+})
+
 const showDialog = ref(false)
 
 let promiseWithResolvers = null
@@ -52,5 +59,8 @@ defineExpose({ promptDesktopMediaSource })
 </script>
 
 <template>
-	<DesktopMediaSourceDialog v-if="showDialog" @submit="handlePrompt($event)" @cancel="handlePrompt('')" />
+	<DesktopMediaSourceDialog v-if="showDialog"
+		:sources="sources"
+		@submit="handlePrompt($event)"
+		@cancel="handlePrompt('')" />
 </template>
