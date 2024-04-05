@@ -37,6 +37,17 @@
 		<div class="spacer" />
 
 		<div class="header__item">
+			<NcButton :aria-label="t('talk_desktop', 'Screen share testing')"
+								type="tertiary-no-background"
+								class="header__button"
+								@click="testGetDesktopMediaSource">
+				<template #icon>
+					<MdiMonitorShare />
+				</template>
+			</NcButton>
+		</div>
+
+		<div class="header__item">
 			<NcButton :aria-label="t('talk_desktop', 'Search')"
 				type="tertiary-no-background"
 				class="header__button"
@@ -67,6 +78,7 @@
 <script>
 import MdiBell from 'vue-material-design-icons/Bell.vue'
 import MdiMagnify from 'vue-material-design-icons/Magnify.vue'
+import MdiMonitorShare from 'vue-material-design-icons/MonitorShare.vue'
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
 import UserMenu from './components/UserMenu.vue'
 import { appData } from '../../app/AppData.js'
@@ -79,6 +91,7 @@ export default {
 	components: {
 		MdiBell,
 		MdiMagnify,
+		MdiMonitorShare,
 		NcButton,
 		UserMenu,
 	},
@@ -96,6 +109,10 @@ export default {
 
 		showNotSupportedAlert(feature) {
 			alert(`Unfortunately, ${feature} is not currently supported by Nextcloud Talk Desktop`)
+		},
+
+		testGetDesktopMediaSource() {
+			window.OCA.Talk.Desktop.getDesktopMediaSource()
 		},
 	},
 }
