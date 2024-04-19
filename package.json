@@ -43,6 +43,7 @@
     "@nextcloud/router": "^3.0.0",
     "@nextcloud/vue": "^8.11.2",
     "core-js": "^3.36.1",
+    "electron-notification-state": "^1.0.4",
     "electron-squirrel-startup": "^1.0.0",
     "floating-vue": "^1.0.0-beta.19",
     "howler": "^2.2.4",

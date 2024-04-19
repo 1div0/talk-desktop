@@ -47,3 +47,5 @@ await import('@talk/src/main.js')
 initTalkHashIntegration(OCA.Talk.instance)
 
 await import('./notifications/notifications.store.js')
+
+console.log('DND', await window.TALK_DESKTOP.getDoNotDisturb())

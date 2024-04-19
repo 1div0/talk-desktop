@@ -168,7 +168,7 @@ export function createNotificationStore() {
 	 *
 	 * @param notification
 	 */
-	function showNativeNotification(notification) {
+	async function showNativeNotification(notification) {
 		if (notification.app !== 'spreed') {
 			return
 		}
@@ -192,7 +192,10 @@ export function createNotificationStore() {
 			// Talk will open the call from notification if necessary
 			emit('notifications:action:execute', event)
 		}, false)
-		playSound(notification.objectType === 'call')
+
+		if (!await window.TALK_DESKTOP.getDoNotDisturb()) {
+			playSound(notification.objectType === 'call')
+		}
 	}
 
 	/**
