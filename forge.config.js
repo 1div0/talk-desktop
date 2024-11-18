@@ -10,6 +10,7 @@ const { MakerSquirrel } = require('@electron-forge/maker-squirrel')
 const { MakerDMG } = require('@electron-forge/maker-dmg')
 const { MakerFlatpak } = require('@electron-forge/maker-flatpak')
 const { MakerZIP } = require('@electron-forge/maker-zip')
+const { MakerWix } = require('@electron-forge/maker-wix')
 const packageJSON = require('./package.json')
 const { MIN_REQUIRED_BUILT_IN_TALK_VERSION } = require('./src/constants.js')
 
@@ -25,7 +26,7 @@ const CONFIG = {
 	// macOS
 	appleAppBundleId: 'com.nextcloud.talk.mac',
 	// Windows
-	winAppId: 'NextcloudTalk',
+	winAppId: 'NextcloudTalk', // For Squirrel.Windows, must be single word without dots and special characters
 	// Linux
 	linuxAppId: 'com.nextcloud.talk',
 }
@@ -111,6 +112,22 @@ module.exports = {
 
 			// Install/Update Loading
 			loadingGif: path.join(__dirname, './img/squirrel-install-loading.gif'),
+		}),
+
+		new MakerWix({
+			appUserModelId: `com.squirrel.${CONFIG.winAppId}`,
+			description: CONFIG.description,
+			exe: `${CONFIG.applicationName}.exe`,
+			name: CONFIG.applicationName,
+			icon: path.join(__dirname, 'img/icons/icon.ico'),
+			manufacturer: CONFIG.companyName,
+			shortName: CONFIG.applicationNameSanitized,
+			ui: {
+				images: {
+					background: path.join(__dirname, 'resources/windows-msi-background.bmp'),
+					banner: path.join(__dirname, 'resources/windows-msi-banner.bmp'),
+				},
+			},
 		}),
 
 		// https://js.electronforge.io/interfaces/_electron_forge_maker_dmg.MakerDMGConfig.html
