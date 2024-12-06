@@ -30,8 +30,6 @@ type CallGetParticipantsForCallResponse = {
 	}
 }
 
-const MISSED_CALL = 'missed_call'
-
 /**
  * Get participants of a call in a conversation
  * @param token - Conversation token
@@ -44,6 +42,7 @@ async function getCallParticipants(token: string) {
 /**
  * Check if the current user has joined the call
  * @param token - Conversation token
+ * @return Promise<boolean|null> - whether participant is in the call (`null` if there is no current call)
  */
 async function hasCurrentUserJoinedCall(token: string) {
 	const user = getCurrentUser()
@@ -52,7 +51,7 @@ async function hasCurrentUserJoinedCall(token: string) {
 	}
 	const participants = await getCallParticipants(token)
 	if (!participants.length) {
-		throw new Error('There are currently no participants in the call', { cause: MISSED_CALL })
+		return null
 	}
 	return participants.some((participant) => user.uid === participant.actorId)
 }
@@ -96,14 +95,13 @@ export function waitCurrentUserHasJoinedCall(token: string, limit?: number): Pro
 
 			try {
 				// Check if the user has joined the call
-				if (await hasCurrentUserJoinedCall(token)) {
+				const result = await hasCurrentUserJoinedCall(token)
+				if (result === null) {
+					return resolve(false)
+				} else if (result === true) {
 					return resolve(true)
 				}
 			} catch (e) {
-				if (e instanceof Error && e.cause === MISSED_CALL) {
-					console.debug(e)
-					return resolve(false)
-				}
 				console.warn('Error while checking if the user has joined the call', e)
 			}
 
