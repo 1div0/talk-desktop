@@ -64,13 +64,12 @@ async function hasCurrentUserJoinedCall(token: string) {
 export async function checkCurrentUserHasPendingCall(token: string): Promise<boolean> {
 	try {
 		const response = await hasCurrentUserJoinedCall(token)
+		if (response === null) {
+			return false
+		}
 		return !response
 	} catch (e) {
-		if (e instanceof Error && e.cause === MISSED_CALL) {
-			console.debug(e)
-		} else {
-			console.warn('Error while checking if the user has pending call', e)
-		}
+		console.warn('Error while checking if the user has pending call', e)
 		return false
 	}
 }
